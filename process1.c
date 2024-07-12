@@ -16,7 +16,7 @@ struct proc
 };
 struct proc p;
 
-void my_handler(int a)
+void sigusr_handler(int a)
 {
  	if(str[0] == 0||str[0]=='\n')
 		 return;
@@ -40,7 +40,7 @@ void send(int signum)
     	fgets(str,100,stdin);
   	 if(str[0]== '*')
     	{
-  		 printf("You left\n");
+  		 printf("Communication Exited.\n");
   		 kill(p.pid,SIGUSR1);
   		 exit(0);  		 
      	}  
@@ -50,22 +50,22 @@ void send(int signum)
 int main()
 {
 	int fd;
-	signal(SIGUSR1,my_handler);
+	signal(SIGUSR1,sigusr_handler);
 	signal(SIGINT,send);
 	shmid = shmget((key_t)4000,1024,0666|IPC_CREAT);
 	if(shmid<0)
 	{
-		 printf("Shmget error!!\n");
+		 printf("ERR: SHMGET.\n");
    	 	 exit(0);
 	 }
 	 str= (char*) shmat(shmid,(void*)0,0);
 	 if(str==NULL)
 	{
-   	 	printf("Shmat error!!\n");
+   	 	printf("ERR: SHMAT.\n");
    	 	exit(0);
 	 }   
 	p.pid = getpid();
-	printf("\nWelcome,enter your name: ");
+	printf("\nEnter Username: ");
 	scanf("%s",name);
 	strcpy(p.user,name);
 	fflush(stdin);
@@ -77,7 +77,7 @@ int main()
 	read(fd,&p,sizeof(p));
 	close(fd);
 	memset(str,0,1024);
-	printf("\nPress Ctrl+C to type a message,type * to exit");
+	printf("\nPress Ctrl+C to type a message, type * to exit");
 	raise(SIGINT);
 	while(1)
 	{ }
